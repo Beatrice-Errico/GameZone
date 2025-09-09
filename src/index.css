@@ -1,0 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');
+
+
+@import "tailwindcss";
+
+@theme{
+    --color-pri: #3A0CA3;
+    --color-sec: #7209B7;
+    --color-acc: #F72585;
+    --color-tre: 
+
+}
+
+ .cards-columns {
+  columns: 2;
+  column-gap: 1.5rem;
+  column-width: 280px; /* dimensione colonna desktop */
+  margin-left: 3rem; /* margine sinistro per allineamento */
+  margin-right: 3rem; /* margine destro per allineamento */
+ }
+
+
+
+@media (max-width: 839px) {
+  .cards-columns {
+    columns: 2;
+    column-gap: 1rem;
+    column-width: 50%;
+    margin-left: 0;
+    margin-right: 0%;
+  }
+
+  .cards-columns > * {
+    height: 180px; /* più basse per telefono */
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+
+  .cards-columns > * img {
+    height: 110px; /* immagine più bassa su telefono */
+  }
+}
+
+
