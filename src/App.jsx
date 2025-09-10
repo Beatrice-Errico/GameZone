@@ -7,8 +7,8 @@ function App() {
 
   
   return (
-    <>
-      <SessionProvider>
+    <> 
+      <SessionProvider >
         <FavoriteProvider>
       <RouterProvider router={router}/>
       </FavoriteProvider>

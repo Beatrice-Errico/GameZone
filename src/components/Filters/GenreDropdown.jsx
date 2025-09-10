@@ -34,11 +34,11 @@ const GenreDropdown = () => {
   const toggleDropdown = () => setOpen((prev) => !prev);
 
   return (
-    <div className="relative w-full mt-20 flex flex-col gap-4" ref={dropdownRef}>
+    <div className=" relative w-full mt-20 flex flex-col gap-4" ref={dropdownRef}>
       <div>
         <button
           onClick={toggleDropdown}
-          className="text-white w-full cursor-pointer px-4 py-2 rounded-md bg-transparent border border-white hover:bg-white/10 transition disabled:opacity-30"
+          className="text-white font-dejavu w-full cursor-pointer px-4 py-2 rounded-md bg-transparent border border-white hover:bg-white/10 transition disabled:opacity-30"
         >
           Filtra per Genere
         </button>

@@ -7,7 +7,7 @@
     --color-pri: #3A0CA3;
     --color-sec: #7209B7;
     --color-acc: #F72585;
-    --color-tre: 
+    --font-dejavu: 'DejaVuSans', sans-serif;
 
 }
 
@@ -39,6 +39,21 @@
   .cards-columns > * img {
     height: 110px; /* immagine più bassa su telefono */
   }
+  @font-face {
+  font-family: 'DejaVuSans';
+  src: url('./assets/fonts/DejaVuSans.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'DejaVuSans';
+  src: url('./assets/fonts/DejaVuSans-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+
 }
 
 

@@ -59,7 +59,7 @@ export default function Homepage() {
   }, [currentPage]);
 
   return (
-    <main className="relative bg-pri/90 min-h-screen text-white">
+    <main className="font-dejavu relative bg-pri/90 min-h-screen text-white">
       {latestGame && <Header game={latestGame} />}
 
       <div className="flex">
