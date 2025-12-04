@@ -2,7 +2,7 @@ import { createBrowserRouter } from "react-router";
 import Layout from "../components/layout/Layout";
 import Homepage from "../view/Homepage";
 import Register from "../view/Register";
-import Login from "../view/login";
+import Login from "../view/Login";
 
 import { get_data, post_loader, games_by_genre_loader, platform_games_loader, year_games_loader, games_by_rating_loader, search_loader, register_loader, homepage_loader } from "../services/loader";
 import Detail from "../view/Detail";
