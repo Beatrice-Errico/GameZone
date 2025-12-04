@@ -11,17 +11,19 @@ export default function ProfilePage() {
 
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-  const [isEditing, setIsEditing] = useState(false); // nuovo stato per modifica
+  const [isEditing, setIsEditing] = useState(false);
 
   const [profile, setProfile] = useState({
-    user_name: "",
+    username: "",
     first_name: "",
     last_name: "",
     avatar_url: "",
   });
 
+  const userId = session?.user?.id;
+
   useEffect(() => {
-    if (!session?.user?.id) return;
+    if (!userId) return;
 
     const getProfile = async () => {
       setLoading(true);
@@ -29,15 +31,16 @@ export default function ProfilePage() {
 
       const { data, error } = await supabase
         .from("profiles")
-        .select("user_name, first_name, last_name, avatar_url")
-        .eq("id", session.user.id)
+        .select("username, first_name, last_name, avatar_url")
+        .eq("id", userId)
         .single();
 
       if (error) {
+        console.error("Errore caricamento profilo:", error);
         setErrorMessage("Errore durante il caricamento del profilo");
       } else if (data) {
         setProfile({
-          user_name: data.user_name || "",
+          username: data.username || "",
           first_name: data.first_name || "",
           last_name: data.last_name || "",
           avatar_url: data.avatar_url || "",
@@ -48,25 +51,30 @@ export default function ProfilePage() {
     };
 
     getProfile();
-  }, [session?.user?.id]);
+  }, [userId]);
 
   const updateProfile = async (event, newAvatarUrl) => {
     if (event) event.preventDefault();
+    if (!userId) return;
+
     setLoading(true);
     setErrorMessage("");
 
     const updates = {
-      id: session.user.id,
-      user_name: profile.user_name,
+      id: userId,
+      username: profile.username,
       first_name: profile.first_name,
       last_name: profile.last_name,
       avatar_url: newAvatarUrl ?? profile.avatar_url,
-      updated_at: new Date(),
     };
 
     const { error } = await supabase.from("profiles").upsert(updates);
+
     if (error) {
-      setErrorMessage("Errore durante l'aggiornamento del profilo: " + error.message);
+      console.error("Errore update profilo:", error);
+      setErrorMessage(
+        "Errore durante l'aggiornamento del profilo: " + error.message
+      );
     } else if (newAvatarUrl) {
       setProfile((prev) => ({ ...prev, avatar_url: newAvatarUrl }));
     }
@@ -81,7 +89,7 @@ export default function ProfilePage() {
 
   if (!session?.user) {
     return (
-      <div className="flex justify-center items-center h-screen text-gray-500">
+      <div className="flex justify-center items-center h-screen bg-black text-gray-400">
         Caricamento sessione...
       </div>
     );
@@ -91,24 +99,27 @@ export default function ProfilePage() {
   let favoriteSection;
   if (loadingFavorites) {
     favoriteSection = (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
         {Array.from({ length: 6 }).map((_, idx) => (
           <div
             key={idx}
-            className="h-40 bg-gray-200 animate-pulse rounded-lg"
+            className="h-40 bg-slate-800/60 animate-pulse rounded-xl border border-slate-700/60"
           />
         ))}
       </div>
     );
-  } else if (favorites.length === 0) {
+  } else if (!favorites || favorites.length === 0) {
     favoriteSection = (
-      <p className="text-center text-gray-400 italic">
-        Nessun gioco preferito ancora salvato.
-      </p>
+      <div className="flex flex-col items-center justify-center py-10 text-slate-400">
+        <p className="italic mb-2">Nessun gioco preferito ancora salvato.</p>
+        <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
+          clicca il cuore su un gioco per aggiungerlo qui
+        </p>
+      </div>
     );
   } else {
     favoriteSection = (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
         {favorites.map((fav) => (
           <CardGame
             key={fav.game_id}
@@ -124,108 +135,205 @@ export default function ProfilePage() {
     );
   }
 
+  const fullName = `${profile.first_name ?? ""} ${profile.last_name ?? ""}`
+    .trim()
+    || "GameZone Player";
+
+  const favoritesCount = favorites?.length ?? 0;
+
   return (
-    <div className="max-w-5xl mx-auto mt-50 p-6 bg-gray-50 rounded-2xl shadow-lg text-gray-900">
-      <div className="flex flex-col items-center mb-8">
-        {loading ? (
-          <div className="w-32 h-32 bg-gray-200 animate-pulse rounded-full mb-4" />
-        ) : (
-          <Avatar url={profile.avatar_url} size={128} />
-        )}
-        <h1 className="text-3xl font-bold mt-4 text-center">
-          {profile.first_name} {profile.last_name}
-        </h1>
-        <p className="text-gray-600 text-center">@{profile.user_name}</p>
+    <div className="min-h-screen bg-gradient-to-b from-[#050816] via-[#070b20] to-[#050816] text-slate-50 mt-20">
+      <div className="max-w-6xl mx-auto px-4 py-10 md:py-14">
+        {/* HEADER TITOLO */}
+        <header className="mb-10">
+          <p className="text-xs uppercase tracking-[0.35em] text-[color:var(--color-acc)]/70 mb-2">
+            GameZone // Player Profile
+          </p>
+          <h1
+  className="text-3xl md:text-4xl font-extrabold tracking-tight"
+  style={{ fontFamily: "Anton, system-ui, sans-serif" }}
+>
+            Area personale
+          </h1>
+          <p className="mt-2 text-sm text-slate-400 max-w-xl">
+            Gestisci il tuo profilo, personalizza il tuo nickname e tieni d&apos;occhio i tuoi titoli preferiti.
+          </p>
+        </header>
 
-        <button
-          onClick={() => setIsEditing(!isEditing)}
-          className="mt-4 py-2 px-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full transition duration-300 shadow"
-        >
-          {isEditing ? "Annulla" : "Modifica Profilo"}
-        </button>
-      </div>
+        <div className="grid lg:grid-cols-[minmax(0,1.2fr)_minmax(0,2fr)] gap-8 items-start">
+          {/* CARD PROFILO */}
+          <section className="bg-slate-900/70 border border-slate-700/70 rounded-2xl p-6 md:p-7 shadow-[0_0_40px_rgba(0,0,0,0.6)] relative overflow-hidden">
+            {/* Glow decorativo */}
+            <div className="pointer-events-none absolute -top-32 -right-10 w-60 h-60 rounded-full bg-[color:var(--color-acc)]/20 blur-3xl" />
+            <div className="relative z-10">
+              <div className="flex flex-col items-center text-center">
+                {loading ? (
+                  <div className="w-28 h-28 bg-slate-800 animate-pulse rounded-full mb-4 border border-slate-700" />
+                ) : (
+                  <div className="relative mb-4">
+                    <div className="absolute inset-0 rounded-full bg-[color:var(--color-acc)]/40 blur-md" />
+                    <div className="relative rounded-full border-2 border-[color:var(--color-acc)]/80 p-1">
+                      <Avatar url={profile.avatar_url} size={110} />
+                    </div>
+                  </div>
+                )}
 
-      {/* Form di modifica */}
-      {isEditing && (
-        <form
-          onSubmit={updateProfile}
-          className="bg-white p-6 rounded-xl shadow-md space-y-6 mb-12"
-        >
-          {errorMessage && (
-            <p className="text-red-500 text-center mb-4">{errorMessage}</p>
-          )}
+                <h2 className="text-2xl font-bold">{fullName}</h2>
+                <p className="text-sm text-slate-400 mt-1">
+                  {profile.username ? (
+                    <span className="font-mono text-[13px] bg-slate-800/80 px-3 py-1 rounded-full border border-slate-700/70">
+                      @{profile.username}
+                    </span>
+                  ) : (
+                    <span className="font-mono text-[13px] text-slate-500">
+                      @username
+                    </span>
+                  )}
+                </p>
 
-          <div className="flex flex-col items-center">
-            <Avatar
-              url={profile.avatar_url}
-              size={96}
-              onUpload={handleAvatarUpload}
-            />
-          </div>
+                {/* MINI STATS */}
+                <div className="mt-5 flex flex-wrap gap-3 justify-center text-xs md:text-sm">
+                  <div className="px-3 py-2 rounded-xl bg-slate-800/80 border border-slate-700/80 flex flex-col items-center min-w-[90px]">
+                    <span className="text-[10px] uppercase tracking-[0.2em] text-slate-500">
+                      Preferiti
+                    </span>
+                    <span className="text-lg font-bold text-[color:var(--color-acc)]">
+                      {favoritesCount}
+                    </span>
+                  </div>
+                  <div className="px-3 py-2 rounded-xl bg-slate-800/80 border border-slate-700/80 flex flex-col items-center min-w-[90px]">
+                    <span className="text-[10px] uppercase tracking-[0.2em] text-slate-500">
+                      Stato
+                    </span>
+                    <span className="text-sm font-semibold">Online</span>
+                  </div>
+                </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-                Username
-              </label>
-              <input
-                id="username"
-                type="text"
-                value={profile.user_name}
-                onChange={(e) =>
-                  setProfile({ ...profile, user_name: e.target.value })
-                }
-                className="mt-1 w-full border-gray-300 rounded-lg p-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                required
-              />
+                <button
+                  onClick={() => setIsEditing((prev) => !prev)}
+                  className="mt-6 py-2.5 px-6 bg-[color:var(--color-acc)] hover:bg-pink-600 text-white text-sm font-semibold rounded-full transition duration-200 shadow-lg shadow-[color:var(--color-acc)]/30"
+                >
+                  {isEditing ? "Annulla modifica" : "Modifica profilo"}
+                </button>
+              </div>
+
+              {/* FORM MODIFICA */}
+              {isEditing && (
+                <form
+                  onSubmit={updateProfile}
+                  className="mt-7 bg-slate-950/50 border border-slate-800/80 rounded-2xl p-5 space-y-5"
+                >
+                  {errorMessage && (
+                    <p className="text-red-400 text-sm text-center mb-2">
+                      {errorMessage}
+                    </p>
+                  )}
+
+                  <div className="flex flex-col items-center mb-3">
+                    <Avatar
+                      url={profile.avatar_url}
+                      size={80}
+                      onUpload={handleAvatarUpload}
+                    />
+                    <p className="text-[11px] text-slate-500 mt-2">
+                      Clicca sull&apos;avatar per caricare una nuova immagine
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div>
+                      <label
+                        htmlFor="username"
+                        className="block text-xs font-semibold text-slate-300 uppercase tracking-[0.18em]"
+                      >
+                        Username
+                      </label>
+                      <input
+                        id="username"
+                        type="text"
+                        value={profile.username}
+                        onChange={(e) =>
+                          setProfile({ ...profile, username: e.target.value })
+                        }
+                        className="mt-1 w-full bg-slate-900/80 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[color:var(--color-acc)]/70"
+                        required
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <label
+                          htmlFor="first_name"
+                          className="block text-xs font-semibold text-slate-300 uppercase tracking-[0.18em]"
+                        >
+                          Nome
+                        </label>
+                          <input
+                          id="first_name"
+                          type="text"
+                          value={profile.first_name}
+                          onChange={(e) =>
+                            setProfile({
+                              ...profile,
+                              first_name: e.target.value,
+                            })
+                          }
+                          className="mt-1 w-full bg-slate-900/80 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[color:var(--color-acc)]/70"
+                        />
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="last_name"
+                          className="block text-xs font-semibold text-slate-300 uppercase tracking-[0.18em]"
+                        >
+                          Cognome
+                        </label>
+                        <input
+                          id="last_name"
+                          type="text"
+                          value={profile.last_name}
+                          onChange={(e) =>
+                            setProfile({
+                              ...profile,
+                              last_name: e.target.value,
+                            })
+                          }
+                          className="mt-1 w-full bg-slate-900/80 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[color:var(--color-acc)]/70"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full mt-2 py-2.5 bg-[color:var(--color-acc)] hover:bg-pink-600 text-white text-sm font-semibold rounded-xl transition duration-200 shadow-lg shadow-[color:var(--color-acc)]/30 disabled:opacity-60"
+                  >
+                    {loading ? "Salvataggio..." : "Salva modifiche"}
+                  </button>
+                </form>
+              )}
+            </div>
+          </section>
+
+          {/* SEZIONE PREFERITI */}
+          <section className="bg-slate-900/60 border border-slate-700/70 rounded-2xl p-5 md:p-7 shadow-[0_0_40px_rgba(0,0,0,0.45)]">
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h2 className="text-xl md:text-2xl font-semibold">
+                  I tuoi giochi preferiti
+                </h2>
+                <p className="text-xs text-slate-400 mt-1">
+                  Libreria personale // {favoritesCount} titolo
+                  {favoritesCount === 1 ? "" : "i"}
+                </p>
+              </div>
             </div>
 
-            <div>
-              <label htmlFor="first_name" className="block text-sm font-medium text-gray-700">
-                Nome
-              </label>
-              <input
-                id="first_name"
-                type="text"
-                value={profile.first_name}
-                onChange={(e) =>
-                  setProfile({ ...profile, first_name: e.target.value })
-                }
-                className="mt-1 w-full border-gray-300 rounded-lg p-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="last_name" className="block text-sm font-medium text-gray-700">
-                Cognome
-              </label>
-              <input
-                id="last_name"
-                type="text"
-                value={profile.last_name}
-                onChange={(e) =>
-                  setProfile({ ...profile, last_name: e.target.value })
-                }
-                className="mt-1 w-full border-gray-300 rounded-lg p-2 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition duration-300 shadow"
-            aria-busy={loading}
-          >
-            {loading ? "Salvataggio..." : "Salva Modifiche"}
-          </button>
-        </form>
-      )}
-
-      {/* Giochi preferiti */}
-      <div className="mt-12">
-        <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800">I tuoi giochi preferiti</h2>
-        {favoriteSection}
+            {favoriteSection}
+          </section>
+        </div>
       </div>
     </div>
   );
