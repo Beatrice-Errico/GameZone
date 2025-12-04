@@ -59,7 +59,7 @@ export default function Homepage() {
   }, [currentPage]);
 
   return (
-    <main className="font-dejavu relative bg-pri/90 min-h-screen text-white">
+    <main className="font-dejavu relative min-h-screen text-white bg-gradient-to-b from-[#1b0258] via-[#070b20] to-[#050816]">
       {latestGame && <Header game={latestGame} />}
 
       <div className="flex">
@@ -72,9 +72,11 @@ export default function Homepage() {
         <section className="flex-1 px-20 pl-1 pr-1 ">
           <article className="col-12 text-center h-60">
             <h1 className="text-3xl font-bold my-6  text-[#4E2BAD]">
-              I nostri post
+              
             </h1>
           </article>
+
+          
 
           <div ref={cardsRef} />
 

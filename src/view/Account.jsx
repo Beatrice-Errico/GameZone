@@ -151,7 +151,7 @@ export default function ProfilePage() {
           </p>
           <h1
   className="text-3xl md:text-4xl font-extrabold tracking-tight"
-  style={{ fontFamily: "Anton, system-ui, sans-serif" }}
+  style={{ fontFamily: "Rajdhani, system-ui, sans-serif" }}
 >
             Area personale
           </h1>
