@@ -147,3 +147,5 @@ export async function register_loader() {
 
   return null; // nessun dato da restituire
 }
+console.log('SUPABASE URL:', supabaseUrl);
+console.log('SUPABASE KEY:', supabaseKey ? 'PRESENTE' : 'MANCANTE');
