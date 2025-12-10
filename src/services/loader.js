@@ -126,8 +126,8 @@ export async function search_loader({ request }) {
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
-  "https://your-project-id.supabase.co",
-  "public-anon-key"
+  "https://txrtstqnlaervjurpbvx.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4cnRzdHFubGFlcnZqdXJwYnZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4MzIyNDIsImV4cCI6MjA4MDQwODI0Mn0.bGEJxhdrg5KWCLb9ZI7-QCdwE9jLKrsmrW3IHVQSBqQ"
 );
 
 export async function register_loader() {
